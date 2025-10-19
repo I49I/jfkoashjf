@@ -1,58 +1,22 @@
-local httpService = game:GetService("HttpService")
+--// Set as Autoload button
+local SaveManager = {} -- Asume que ya tienes tu SaveManager cargado en tu script
 
-    function InterfaceManager:SetFolder(folder)
-		self.Folder = folder;
-		self:BuildFolderTree()
-	end
+-- Función para guardar la configuración marcada como autoload
+function SaveManager:SaveAutoloadConfig()
+    -- Aquí guardamos el archivo de configuración y lo marcamos para autoload
+    local folder = "FluentScriptHub/PlayerConfig"
+    if not isfolder(folder) then makefolder(folder) end
 
-    function InterfaceManager:SetLibrary(library)
-		self.Library = library
-	end
+    local path = folder .. "/autoload.json"
+    writefile(path, '{"autoload":true}')
+    print("Configuración marcada como autoload")
+end
 
-    function InterfaceManager:BuildFolderTree()
-		local paths = {}
-
-		local parts = self.Folder:split("/")
-		for idx = 1, #parts do
-			paths[#paths + 1] = table.concat(parts, "/", 1, idx)
-		end
-
-		table.insert(paths, self.Folder)
-		table.insert(paths, self.Folder .. "/settings")
-
-		for i = 1, #paths do
-			local str = paths[i]
-			if not isfolder(str) then
-				makefolder(str)
-			end
-		end
-	end
-
-    function InterfaceManager:SaveSettings()
-        writefile(self.Folder .. "/options.json", httpService:JSONEncode(InterfaceManager.Settings))
-    end
-
-    function InterfaceManager:LoadSettings()
-        local path = self.Folder .. "/options.json"
-        if isfile(path) then
-            local data = readfile(path)
-            local success, decoded = pcall(httpService.JSONDecode, httpService, data)
-
-            if success then
-                for i, v in next, decoded do
-                    InterfaceManager.Settings[i] = v
-                end
-            end
-        end
-    end
-
-		local MenuKeybind = section:AddKeybind("MenuKeybind", { Title = "Minimize Bind", Default = Settings.MenuKeybind })
-		MenuKeybind:OnChanged(function()
-			Settings.MenuKeybind = MenuKeybind.Value
-            InterfaceManager:SaveSettings()
-	
-	end)
-		Library.MinimizeKeybind = MenuKeybind
-    endend
-
-return InterfaceManager
+-- Ejemplo de uso con tu GUI (Fluent)
+Tabs.Settings:AddButton({
+    Title = "Set as Autoload",
+    Description = "Mark current config to autoload",
+    Callback = function()
+        SaveManager:SaveAutoloadConfig()
+    end,
+})
